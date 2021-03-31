@@ -1,8 +1,31 @@
 <?php
-
 session_start();
-require('src/connexion.php');
 
+if (!empty($_POST['email']) && !empty($_POST['password'])) {
+	require('src/connection.php');
+	$email = $_POST['email'];
+	$password = $_POST['password'];
+	$check = false;
+
+
+	$password = "kev" . sha1($password . "9875") . "2565";
+
+	// Connexion
+	$req = $bdd->prepare("SELECT * FROM user where  email=?");
+	$req->execute(array($email));
+
+	while ($user = $req->fetch()) {
+		if ($user['email'] == $email && $user['password'] == $password) {
+			$check = true;
+			$_SESSION['connect'] = 1;
+			$_SESSION['user'] = $user['email'];
+			header('location:index.php?email=valide et password valide');
+		}
+	}
+	if ($check == false) {
+		header('location:./?error=1');
+	}
+}
 
 ?>
 
@@ -25,7 +48,9 @@ require('src/connexion.php');
 	<section>
 		<div id="login-body">
 			<h1>S'identifier</h1>
-
+			<?php if (isset($_GET['error'])) {
+				echo '<p id="error"> Authentification echouer </p>';
+			} ?>
 			<form method="post" action="index.php">
 				<input type="email" name="email" placeholder="Votre adresse email" required />
 				<input type="password" name="password" placeholder="Mot de passe" required />
